@@ -1,0 +1,21 @@
+# Core dependencies
+streamlit
+python-dotenv
+google-generativeai
+youtube-transcript-api
+
+# Video/Audio processing
+yt-dlp
+opencv-python
+openai-whisper  # Audio transcription (REQUIRED - explicit installation)
+
+# Image processing & OCR
+easyocr
+scikit-image
+numpy>=1.26.4  # Use pre-built wheel, not source
+
+# RAG / Embeddings for chat-with-video
+sentence-transformers
+faiss-cpu
+
+# Note: pathlib is built-in to Python 3.4+, no need to install  
