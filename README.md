@@ -200,10 +200,11 @@ The sidebar allows you to:
 ---
 
 ## 📝 Example Output
+
+<img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/f7c005ba-e463-4fb8-aedd-4f21ddefa507" />
+
+
 <img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/23e52f8b-92a2-4c4e-86c5-b38b69fc7501" />
-
-<img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/8267b90a-8c65-4b56-a89f-c02f17dc2d9c" />
-
 
 <img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/46e4a683-ca30-4994-b062-67d0a615f2da" />
 
