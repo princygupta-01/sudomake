@@ -1,203 +1,19 @@
-# 🎓 Multimodal AI Lecture Summarizer
 
-A production-grade system that analyzes **video, audio, visual text (slides/board), and subtitles** to generate comprehensive, structured lecture notes using multimodal AI fusion.
 
-## ⚖️ Terms of Service Compliance
+# LetsStud - Multimodal Lecture Notes Generator
 
-**This tool is designed to be TOS-safe:**
+LetsStud converts YouTube lectures into structured study notes by combining
 
-✅ **Temporary Processing Only** - All video/audio files are automatically deleted after analysis  
-✅ **Text-Only Outputs** - Only generates summaries, transcripts, and notes (no media files)  
-✅ **No Redistribution** - Does not store, host, or redistribute YouTube content  
-✅ **Transformative Use** - Creates derived content (notes, summaries) for personal learning  
-✅ **User-Provided URLs** - Only processes videos when users provide their own links  
 
-**Important:** This tool is intended for personal learning and note-taking purposes. All media files are processed temporarily and deleted immediately after analysis. Only text-based derived content is generated.
+Students waste hours rewatching lectures to extract key concepts, formulas, and explanations.
 
----
+This system automatically converts any lecture video into **structured, study-ready notes** by intelligently combining:
 
-## 🏗️ Architecture
+- 🎤 Spoken explanations (audio transcription)
+- 👁️ Slide & board content (visual OCR)
+- 📝 Subtitles (fallback reference)
 
-```
-YouTube Video
- ├── Audio Stream
- │    └── yt-dlp → Whisper → Timestamped Transcript
- │
- ├── Video Stream
- │    └── yt-dlp → OpenCV → Frame Extraction
- │         └── SSIM Change Detection → EasyOCR → Visual Text
- │
- └── Subtitles (Fallback)
-      └── YouTubeTranscriptApi → Subtitle Text
-              ↓
-      Timestamp Alignment (5s windows)
-              ↓
-      Multimodal Fusion
-              ↓
-      Gemini LLM (Structured Generation)
-              ↓
-      Post-processing & Formatting
-              ↓
-      Structured Lecture Notes (Markdown)
-```
-
----
-
-## ✨ Features
-
-- **🎤 Audio Transcription** - Whisper-based speech-to-text with timestamps
-- **👁️ Visual Text Extraction** - OCR from slides, whiteboards, and handwritten content
-- **🔍 Smart Frame Selection** - SSIM-based change detection to avoid duplicate OCR
-- **📝 Subtitle Fallback** - YouTube subtitles as backup when audio/visual is unclear
-- **🔗 Multimodal Fusion** - Timestamp-aligned combination of all data sources
-- **🤖 LLM Summarization** - Gemini-powered structured note generation
-- **⚙️ Configurable Processing** - Toggle features, adjust frame intervals
-- **📊 Real-time Progress** - Step-by-step processing feedback
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Python 3.8+**
-- **FFmpeg** (REQUIRED - install from [ffmpeg.org](https://ffmpeg.org/download.html))
-- **Google API Key** (get from [Google AI Studio](https://makersuite.google.com/app/apikey))
-
-### Installation
-
-```bash
-# 1. Activate virtual environment
-venv\Scripts\activate  # Windows
-# or
-source venv/bin/activate  # Mac/Linux
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Create .env file with your API key
-# Create a file named .env and add:
-# GOOGLE_API_KEY=your_actual_api_key_here
-
-# 4. Run the app
-streamlit run app.py
-```
-
-The app will open at `http://localhost:8501`
-
----
-
-## 📋 Requirements
-
-```
-streamlit              # Web UI framework
-python-dotenv          # Environment variables
-google-generativeai    # Gemini LLM API
-youtube-transcript-api # Subtitle extraction
-yt-dlp                 # Video/audio download
-opencv-python          # Video processing
-easyocr                # OCR for visual text
-scikit-image           # Image comparison (SSIM)
-openai-whisper         # Audio transcription
-numpy                  # Array operations
-```
-
----
-
-## 🎯 How It Works
-
-### Processing Pipeline
-
-1. **🎤 Audio Extraction** - Downloads audio, transcribes with Whisper (timestamped segments)
-2. **📹 Frame Extraction** - Downloads video, extracts frames every N seconds (configurable)
-3. **🔍 Change Detection** - Uses SSIM to identify significant visual content changes
-4. **👁️ OCR Processing** - Extracts text from changed frames (formulas, definitions, slides)
-5. **📝 Subtitle Fetching** - Retrieves YouTube subtitles as fallback reference
-6. **🔗 Multimodal Fusion** - Aligns audio, visual, and subtitle data by timestamp (5s windows)
-7. **🤖 LLM Generation** - Gemini creates structured notes prioritizing:
-   - Visual text for formulas/definitions
-   - Audio for explanations/concepts
-   - Subtitles only when content is missing
-8. **✅ Post-processing** - Formats output into clean Markdown notes
-
-### Prioritization Logic
-
-- **Visual Text** → Formulas, equations, definitions, written content
-- **Audio Transcript** → Explanations, concepts, spoken narrative
-- **Subtitles** → Fallback when audio/visual is unclear or missing
-
----
-
-## ⚙️ Configuration
-
-The sidebar allows you to:
-
-- **Enable/Disable OCR** - Toggle visual text extraction
-- **Enable/Disable Subtitles** - Toggle subtitle fallback
-- **Frame Interval** - Adjust extraction frequency (2-10 seconds)
-  - Lower = more frames = better accuracy but slower
-  - Higher = fewer frames = faster but may miss content
-
----
-
-## 🐛 Troubleshooting
-
-### FFmpeg Not Found
-**Solution:** Install FFmpeg and add to PATH. Verify with `ffmpeg -version`
-
-### Module Not Found
-**Solution:** Ensure virtual environment is activated and run `pip install -r requirements.txt`
-
-### Out of Memory
-**Solution:** Increase frame interval (5-10 seconds) or disable OCR
-
-### EasyOCR Slow First Run
-**Solution:** Normal - downloads ~500MB models on first use. Subsequent runs are faster.
-
-### API Key Not Found
-**Solution:** Check `.env` file exists in project root with correct `GOOGLE_API_KEY=...`
-
----
-
-## 📊 Performance Tips
-
-- **Faster Processing:** Increase frame interval (5-10 seconds)
-- **Better Accuracy:** Lower frame interval (2-3 seconds) but expect slower processing
-- **Lower Memory:** Increase frame interval OR disable OCR
-- **First Run:** Expect 5-10 minutes for model downloads (EasyOCR + Whisper)
-
----
-
-## 🎓 Use Cases
-
-- **Lecture Videos** - Convert recorded lectures into study notes
-- **Tutorial Videos** - Extract key concepts and formulas
-- **Webinars** - Generate summaries with slide content
-- **Educational Content** - Create comprehensive notes from video courses
-
----
-
-## 🔬 Technical Details
-
-### Frame Change Detection
-- Uses **Structural Similarity Index (SSIM)** to compare consecutive frames
-- Threshold: 0.85 (configurable)
-- Only processes frames with significant content changes
-- Reduces OCR computation by ~60-80%
-
-### Timestamp Alignment
-- Creates 5-second time windows
-- Aligns audio segments, visual text, and subtitles
-- Handles overlapping segments correctly
-- Ensures no information loss during fusion
-
-### OCR Optimization
-- EasyOCR initialized once (singleton pattern)
-- Confidence threshold: 0.5
-- Processes only changed frames (not all frames)
-- Supports printed and handwritten text
-
----
+All fused into one coherent, timestamp-aligned study document.
 
 ## 📝 Example Output
 
@@ -210,65 +26,156 @@ The sidebar allows you to:
 
 <img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/f4b6b0d3-8c31-455f-8489-5cabd6131a73" />
 
-The system generates structured Markdown notes with:
+Current stack in this repo:
 
-- Clear headings and subheadings
-- Bullet points for key concepts
-- **Bold** formatting for important terms
-- Formulas and equations from visual content
-- Timestamps for major topic transitions
-- Complete coverage of lecture content
+- Backend: FastAPI (`backend/main.py`)
+- Frontend: Next.js 14 (`frontend`)
 
----
+## What Is Implemented
 
-## 🛠️ Development
+- YouTube URL -> AI-generated notes
+- Multimodal fusion (audio + visual OCR + subtitle fallback)
+- Markdown-style long-form notes generation
+- Local note saving in browser `localStorage`
+- Download generated notes as `.txt` / `.pdf` from frontend
+- Temporary media handling in backend pipeline cleanup helpers
 
-### Project Structure
+## Current API (backend/main.py)
 
+- `POST /analyze`
+  - Body: `{ "youtube_url": "https://..." }`
+  - Response: `{ "notes": "...generated notes..." }`
+
+- `POST /download`
+  - Body: `{ "notes": "...", "type": "txt" | "pdf" }`
+  - Returns downloadable file response
+
+## Project Structure
+
+```text
+letsStud/
++-- README.md
++-- backend/
+�   +-- main.py
+�   +-- pipeline.py
+�   +-- requirements.txt
+�   +-- .env
++-- frontend/
+    +-- app/
+    +-- components/
+    +-- package.json
+    +-- .env.local
+    +-- ...
 ```
-yt_transcriber_baseline/
-├── app.py              # Main Streamlit application
-├── requirements.txt    # Python dependencies
-├── .env                # Environment variables (create this)
-└── README.md          # This file
+
+## Backend Setup (FastAPI)
+
+### 1. Prerequisites
+
+- Python 3.10+ recommended
+- FFmpeg installed and available in PATH
+- Google Gemini API key
+
+### 2. Install
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### Key Functions
+### 3. Environment
 
-- `get_whisper_transcript()` - Audio transcription with timestamps
-- `extract_video_frames()` - Frame extraction from video
-- `detect_content_changes()` - SSIM-based change detection
-- `extract_visual_text()` - OCR text extraction
-- `get_subtitle_transcript()` - Subtitle fallback
-- `fuse_multimodal_data()` - Timestamp alignment and fusion
-- `generate_multimodal_notes()` - LLM-powered note generation
+Create `backend/.env`:
 
----
+```env
+GOOGLE_API_KEY=your_google_api_key
+```
 
-## 📄 License
+### 4. Run backend
 
-This project is for educational purposes.
+```bash
+uvicorn main:app --reload --port 8000
+```
 
----
+Backend base URL:
 
-## 🙏 Acknowledgments
+```text
+http://localhost:8000
+```
 
-- **OpenAI Whisper** - Audio transcription
-- **EasyOCR** - Visual text extraction
-- **Google Gemini** - LLM summarization
-- **Streamlit** - Web interface framework
+## Frontend Setup (Next.js)
 
----
+### 1. Install
 
-## 🔮 Future Enhancements
-- [ ] multimodes of input
-- [ ] Topic-wise segmentation
-- [ ] Quiz generation from notes
-- [ ] PDF export functionality
-- [ ] FastAPI backend + Streamlit frontend
-- [ ] Batch processing for multiple videos
-- [ ] Custom model fine-tuning
+```bash
+cd frontend
+npm install
+```
 
----
+### 2. Environment
 
-**Built with ❤️ for students and educators**
+Create/update `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+```
+
+### 3. Run frontend
+
+```bash
+npm run dev
+```
+
+Frontend URL:
+
+```text
+http://localhost:3000
+```
+
+## How It Works (Pipeline)
+
+1. Extract/transcribe audio with Whisper
+2. Extract frames from video
+3. Detect scene/content changes (SSIM)
+4. OCR on selected frames
+5. Fetch subtitles as fallback
+6. Fuse all sources by timestamp windows
+7. Generate final notes with Gemini
+
+## Notes About Current State
+
+- Main backend entrypoint is `backend/main.py`.
+- Primary frontend flow uses `POST /analyze`.
+- Notes are stored locally in browser storage (not Firestore).
+- Login/signup pages are present in UI, but the project currently works without authentication.
+
+## Backend Dependencies (from requirements.txt)
+
+- `fastapi`, `uvicorn`, `python-dotenv`
+- `google-genai`
+- `yt-dlp`, `openai-whisper`
+- `opencv-python`, `easyocr`, `scikit-image`, `numpy==1.26.4`
+- `sentence-transformers`, `faiss-cpu`
+- `youtube-transcript-api`
+
+## Troubleshooting
+
+- `ffmpeg not found`
+  - Install FFmpeg and verify with `ffmpeg -version`
+
+- Gemini key error
+  - Ensure `backend/.env` has valid `GOOGLE_API_KEY`
+
+- Slow first run
+  - Whisper/EasyOCR models may download on first execution
+
+- CORS/API errors from frontend
+  - Confirm backend is running on `http://localhost:8000`
+  - Confirm `NEXT_PUBLIC_BACKEND_URL` matches backend URL
+
+## Responsible Use
+
+This tool is intended for personal learning and note-taking. Process only content you are authorized to use.
+
