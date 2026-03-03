@@ -1,4 +1,9 @@
-# 🎓 Multimodal AI Lecture Summarizer - LetsStud
+
+
+# LetsStud - Multimodal Lecture Notes Generator
+
+LetsStud converts YouTube lectures into structured study notes by combining
+
 
 Students waste hours rewatching lectures to extract key concepts, formulas, and explanations.
 
@@ -21,276 +26,156 @@ All fused into one coherent, timestamp-aligned study document.
 
 <img width="1920" height="1042" alt="image" src="https://github.com/user-attachments/assets/f4b6b0d3-8c31-455f-8489-5cabd6131a73" />
 
+Current stack in this repo:
 
----
+- Backend: FastAPI (`backend/main.py`)
+- Frontend: Next.js 14 (`frontend`)
 
-## 🧠 Why Multimodal?
+## What Is Implemented
 
-Most video summarizers rely only on transcripts.
+- YouTube URL -> AI-generated notes
+- Multimodal fusion (audio + visual OCR + subtitle fallback)
+- Markdown-style long-form notes generation
+- Local note saving in browser `localStorage`
+- Download generated notes as `.txt` / `.pdf` from frontend
+- Temporary media handling in backend pipeline cleanup helpers
 
-That misses:
-- Board derivations
-- Slide formulas
-- Written definitions
-- Visual diagrams
+## Current API (backend/main.py)
 
-This system combines:
+- `POST /analyze`
+  - Body: `{ "youtube_url": "https://..." }`
+  - Response: `{ "notes": "...generated notes..." }`
 
-- **Audio** → Explanations & conceptual flow  
-- **Visual OCR** → Formulas, definitions, written content  
-- **Subtitles** → Accuracy fallback  
+- `POST /download`
+  - Body: `{ "notes": "...", "type": "txt" | "pdf" }`
+  - Returns downloadable file response
 
-Result: Notes that feel like they were written by a focused student — not a generic AI summary.
+## Project Structure
 
----
-
-## ⚖️ Compliance & Responsible Design
-
-This system is intentionally engineered to respect platform policies:
-
-- ✅ Temporary in-memory media processing  
-- ✅ No storage or redistribution of video content  
-- ✅ Only derived, text-based outputs  
-- ✅ User-initiated processing (no scraping automation)  
-- ✅ Automatic deletion of media files after analysis  
-
-This tool is designed strictly for personal learning and academic note-taking.
-
----
-
-## 🏗️ Architecture Overview
-
-```
-YouTube Video
- ├── Audio Stream
- │    └── yt-dlp → Whisper → Timestamped Transcript
- │
- ├── Video Stream
- │    └── yt-dlp → OpenCV → Frame Extraction
- │         └── SSIM Change Detection → EasyOCR → Visual Text
- │
- └── Subtitles (Fallback)
-      └── YouTubeTranscriptApi → Subtitle Text
-              ↓
-      Timestamp Alignment (5s windows)
-              ↓
-      Multimodal Fusion
-              ↓
-      Gemini LLM (Structured Generation)
-              ↓
-      Post-processing & Formatting
-              ↓
-      Structured Lecture Notes (Markdown)
+```text
+letsStud/
++-- README.md
++-- backend/
+�   +-- main.py
+�   +-- pipeline.py
+�   +-- requirements.txt
+�   +-- .env
++-- frontend/
+    +-- app/
+    +-- components/
+    +-- package.json
+    +-- .env.local
+    +-- ...
 ```
 
----
+## Backend Setup (FastAPI)
 
-## ✨ Core Capabilities
+### 1. Prerequisites
 
-- 🎤 **Timestamped Whisper Transcription**
-- 👁️ **OCR from Slides & Whiteboards**
-- 🔍 **SSIM-based Scene Change Detection**
-- 🔗 **Timestamp-Aligned Multimodal Fusion**
-- 🤖 **Gemini-Powered Structured Notes**
-- ⚙️ **Configurable Accuracy vs Speed**
-- 📊 Real-time step-by-step processing feedback
+- Python 3.10+ recommended
+- FFmpeg installed and available in PATH
+- Google Gemini API key
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.8+
-- FFmpeg (REQUIRED) → https://ffmpeg.org/download.html
-- Google API Key → https://makersuite.google.com/app/apikey
-
----
-
-### Installation
+### 2. Install
 
 ```bash
-# 1. Activate virtual environment
-venv\Scripts\activate     # Windows
-# or
-source venv/bin/activate  # Mac/Linux
-
-# 2. Install dependencies
+cd backend
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
-
-# 3. Create .env file
-# Add:
-GOOGLE_API_KEY=your_api_key_here
-
-# 4. Run the app
-streamlit run app.py
 ```
 
-Open:  
-`http://localhost:8501`
+### 3. Environment
 
----
+Create `backend/.env`:
 
-## 📋 Requirements
-
-```
-streamlit
-python-dotenv
-google-generativeai
-youtube-transcript-api
-yt-dlp
-opencv-python
-easyocr
-scikit-image
-openai-whisper
-numpy
+```env
+GOOGLE_API_KEY=your_google_api_key
 ```
 
----
+### 4. Run backend
 
-## 🔬 Processing Pipeline
-
-### 1️⃣ Audio Extraction
-- Downloads audio stream
-- Whisper generates timestamped transcript
-
-### 2️⃣ Frame Extraction
-- Extracts video frames at configurable intervals
-- Uses SSIM to detect meaningful scene changes
-
-### 3️⃣ OCR Processing
-- Extracts formulas and written content
-- Filters low-confidence detections
-- Processes only changed frames (optimization)
-
-### 4️⃣ Subtitle Fallback
-- Fetches YouTube subtitles
-- Used only when audio/visual is unclear
-
-### 5️⃣ Multimodal Fusion
-- Creates 5-second time windows
-- Aligns audio, OCR, and subtitle data
-- Ensures no information loss
-
-### 6️⃣ Structured LLM Generation
-Gemini prioritizes:
-
-- Visual text → formulas & definitions
-- Audio transcript → explanations
-- Subtitles → fallback only
-
-Output: Clean, structured Markdown notes.
-
----
-
-## 🎯 Prioritization Logic
-
-| Source | Used For |
-|--------|----------|
-| Visual OCR | Formulas, equations, definitions |
-| Audio Transcript | Explanations, concepts |
-| Subtitles | Missing or unclear content |
-
----
-
-## ⚙️ Configuration Options
-
-- Enable / Disable OCR
-- Enable / Disable Subtitles
-- Frame Interval (2–10 seconds)
-  - Lower = More accurate, slower
-  - Higher = Faster, may miss detail
-
----
-
-## 📊 Performance Tips
-
-- Faster → Increase frame interval (5–10s)
-- Higher accuracy → Lower interval (2–3s)
-- Lower memory → Disable OCR or increase interval
-- First run → Expect model downloads (EasyOCR + Whisper)
-
----
-
-## 📝 Example Output
-
-The system generates:
-
-- Clear headings & subheadings
-- Bold key concepts
-- Extracted formulas
-- Timestamp references
-- Complete lecture coverage
-
-Structured Markdown output ready for:
-- Study
-- Revision
-- Flashcards
-- Export to PDF
-
----
-
-## 💡 What Makes This Different
-
-Unlike standard transcript summarizers:
-
-- We extract board content using OCR.
-- We detect scene changes intelligently (SSIM).
-- We align multiple modalities by timestamp.
-- We prioritize formulas from visual data over speech.
-
-This produces academically usable notes — not generic summaries.
-
----
-
-## 🎓 Use Cases
-
-- Recorded lectures
-- Tutorial videos
-- Webinars
-- Online courses
-- Technical derivations
-- Exam revision
-
----
-
-## 🛠️ Project Structure
-
-```
-yt_transcriber_baseline/
-├── app.py
-├── requirements.txt
-├── .env
-└── README.md
+```bash
+uvicorn main:app --reload --port 8000
 ```
 
----
+Backend base URL:
 
-## 🔮 Roadmap
+```text
+http://localhost:8000
+```
 
-- [ ] Topic-wise segmentation
-- [ ] AI-generated quizzes
-- [ ] PDF export
-- [ ] FastAPI backend + modern frontend
-- [ ] Batch video processing
-- [ ] Study mode (flashcards)
+## Frontend Setup (Next.js)
 
----
+### 1. Install
 
-## 🙏 Acknowledgments
+```bash
+cd frontend
+npm install
+```
 
-- OpenAI Whisper
-- EasyOCR
-- Google Gemini
-- Streamlit
-- yt-dlp
+### 2. Environment
 
----
+Create/update `frontend/.env.local`:
 
-## 📄 License
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+```
 
-Educational use only.
+### 3. Run frontend
 
----
+```bash
+npm run dev
+```
 
-Built with ❤️ for students who value structured understanding over passive watching.
+Frontend URL:
+
+```text
+http://localhost:3000
+```
+
+## How It Works (Pipeline)
+
+1. Extract/transcribe audio with Whisper
+2. Extract frames from video
+3. Detect scene/content changes (SSIM)
+4. OCR on selected frames
+5. Fetch subtitles as fallback
+6. Fuse all sources by timestamp windows
+7. Generate final notes with Gemini
+
+## Notes About Current State
+
+- Main backend entrypoint is `backend/main.py`.
+- Primary frontend flow uses `POST /analyze`.
+- Notes are stored locally in browser storage (not Firestore).
+- Login/signup pages are present in UI, but the project currently works without authentication.
+
+## Backend Dependencies (from requirements.txt)
+
+- `fastapi`, `uvicorn`, `python-dotenv`
+- `google-genai`
+- `yt-dlp`, `openai-whisper`
+- `opencv-python`, `easyocr`, `scikit-image`, `numpy==1.26.4`
+- `sentence-transformers`, `faiss-cpu`
+- `youtube-transcript-api`
+
+## Troubleshooting
+
+- `ffmpeg not found`
+  - Install FFmpeg and verify with `ffmpeg -version`
+
+- Gemini key error
+  - Ensure `backend/.env` has valid `GOOGLE_API_KEY`
+
+- Slow first run
+  - Whisper/EasyOCR models may download on first execution
+
+- CORS/API errors from frontend
+  - Confirm backend is running on `http://localhost:8000`
+  - Confirm `NEXT_PUBLIC_BACKEND_URL` matches backend URL
+
+## Responsible Use
+
+This tool is intended for personal learning and note-taking. Process only content you are authorized to use.
+
